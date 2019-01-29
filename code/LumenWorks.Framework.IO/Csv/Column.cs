@@ -70,6 +70,8 @@ namespace LumenWorks.Framework.IO.Csv
         
         public string DateParseExact { get; set; }
 
+        public string[] DateParseExactFormats { get; set; }
+
         /// <summary>
         /// Converts the value into the column type.
         /// </summary>
@@ -202,9 +204,13 @@ namespace LumenWorks.Framework.IO.Csv
                 case "DateTime":
                     {
                         DateTime x;
-                        if (!string.IsNullOrEmpty(DateParseExact))
+                        if (null != DateParseExactFormats)
                         {
-                            converted = DateTime.TryParseExact(value, DateParseExact, Culture, DateTimeStyles, out x);
+                            converted = DateTime.TryParseExact(value, DateParseExactFormats, Culture, DateTimeStyles, out x);
+                        }
+                        else if (!string.IsNullOrEmpty(DateParseExact))
+                        {
+                             converted = DateTime.TryParseExact(value, DateParseExact, Culture, DateTimeStyles, out x);
                         }
                         else
                         {
