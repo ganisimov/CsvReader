@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LumenWorks.Framework.IO.Csv.Events;
+using LumenWorks.Framework.IO.Csv.Exceptions;
+using System;
 using System.Globalization;
 
 namespace LumenWorks.Framework.IO.Csv
@@ -21,6 +23,15 @@ namespace LumenWorks.Framework.IO.Csv
             NumberStyles = NumberStyles.Any;
             DateTimeStyles = DateTimeStyles.None;
             DateParseExact = null;
+        }
+
+        public event EventHandler<ConvertErrorEventArgs> ConvertError;
+
+        protected virtual void OnConvertError(ConvertErrorEventArgs e)
+        {
+            var handler = ConvertError;
+
+            handler?.Invoke(this, e);
         }
 
         /// <summary>
@@ -66,9 +77,24 @@ namespace LumenWorks.Framework.IO.Csv
         /// <returns>Converted value.</returns>
         public object Convert(string value)
         {
-            TryConvert(value, out object x);
+            var converted = TryConvert(value, out object x);
 
-            return x;
+            if (converted)
+            {
+               return x;
+            }
+            else 
+            {
+               HandleConversionError(value);
+               return null;
+            }
+        }
+
+        private void HandleConversionError(string value)
+        {
+            OnConvertError(
+               new ConvertErrorEventArgs(
+                  new MalformedFieldException(this, value)));
         }
 
         /// <summary>
@@ -83,6 +109,11 @@ namespace LumenWorks.Framework.IO.Csv
 
             switch (typeName)
             {
+                case "String":
+                    result = value;
+                    converted = true;
+                    break;
+
                 case "Guid":
                     try
                     {
