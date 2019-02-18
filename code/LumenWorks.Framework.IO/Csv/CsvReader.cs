@@ -2145,7 +2145,12 @@ namespace LumenWorks.Framework.IO.Csv
         bool IDataRecord.IsDBNull(int i)
         {
             ValidateDataReader(DataReaderValidations.IsInitialized | DataReaderValidations.IsNotClosed);
-            return NullValue == null ? string.IsNullOrEmpty(this[i]) : string.Equals(this[i], NullValue, StringComparison.OrdinalIgnoreCase);
+            return 
+               NullValue == null 
+                  ? string.IsNullOrEmpty(this[i]) 
+                  : string.Equals(this[i], NullValue, StringComparison.OrdinalIgnoreCase) ||
+                     /// treat empty string as NULL for non-string types
+                     (string.IsNullOrEmpty(this[i]) && ((IDataRecord)this).GetFieldType(i) != typeof(string)) ;
         }
 
         long IDataRecord.GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
