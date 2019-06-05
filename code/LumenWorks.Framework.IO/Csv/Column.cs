@@ -65,9 +65,11 @@ namespace LumenWorks.Framework.IO.Csv
         public CultureInfo Culture { get; set; }
 
         public NumberStyles NumberStyles { get; set; }
-        
+
         public DateTimeStyles DateTimeStyles { get; set; }
-        
+
+        public string DateTimeOffsetParseExact { get; set; }
+
         public string DateParseExact { get; set; }
 
         public string[] DateParseExactFormats { get; set; }
@@ -85,7 +87,7 @@ namespace LumenWorks.Framework.IO.Csv
             {
                return x;
             }
-            else 
+            else
             {
                HandleConversionError(value);
                return null;
@@ -219,6 +221,21 @@ namespace LumenWorks.Framework.IO.Csv
                         result = x;
                     }
                     break;
+
+               case "DateTimeOffset":
+                  {
+                      DateTimeOffset x;
+                      if (null != DateTimeOffsetParseExact)
+                      {
+                          converted = DateTimeOffset.TryParseExact(value, DateTimeOffsetParseExact, Culture, DateTimeStyles, out x);
+                      }
+                      else
+                      {
+                          converted = DateTimeOffset.TryParse(value, Culture, DateTimeStyles, out x);
+                      }
+                      result = x;
+                  }
+                  break;
 
                 default:
                     converted = false;
